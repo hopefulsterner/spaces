@@ -1,9 +1,30 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { getFileContent } from '../services/api'
 import './ProjectPreview.css'
 
 function ProjectPreview({ project, isLoading }) {
   const [activeTab, setActiveTab] = useState('preview')
   const [selectedFile, setSelectedFile] = useState(null)
+  const [fileContent, setFileContent] = useState('')
+  const [loadingFile, setLoadingFile] = useState(false)
+
+  // Fetch file content when a file is selected
+  useEffect(() => {
+    if (selectedFile !== null && project?.files?.[selectedFile]) {
+      const filePath = project.files[selectedFile].path
+      setLoadingFile(true)
+      getFileContent(project.id, filePath)
+        .then(content => setFileContent(content))
+        .catch(() => setFileContent('Failed to load file content'))
+        .finally(() => setLoadingFile(false))
+    }
+  }, [selectedFile, project])
+
+  // Reset selected file when project changes
+  useEffect(() => {
+    setSelectedFile(null)
+    setFileContent('')
+  }, [project?.id])
 
   if (isLoading) {
     return (
@@ -123,7 +144,7 @@ function ProjectPreview({ project, isLoading }) {
                 <div className="file-content-header">
                   <span>{project.files[selectedFile].path}</span>
                 </div>
-                <pre><code>{project.files[selectedFile].content || 'No content available'}</code></pre>
+                <pre><code>{loadingFile ? 'Loading...' : fileContent}</code></pre>
               </div>
             )}
           </div>

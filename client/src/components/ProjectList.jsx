@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { listProjects, getProject } from '../services/api'
 import './ProjectList.css'
 
@@ -7,11 +7,7 @@ function ProjectList({ onSelectProject }) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  useEffect(() => {
-    loadProjects()
-  }, [])
-
-  async function loadProjects() {
+  const loadProjects = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     
@@ -23,7 +19,11 @@ function ProjectList({ onSelectProject }) {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    loadProjects()
+  }, [loadProjects])
 
   async function handleSelect(projectSummary) {
     try {

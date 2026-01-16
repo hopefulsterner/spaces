@@ -17,9 +17,20 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Security middleware
+// Note: CSP is configured to allow iframe preview content while maintaining security
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
-  contentSecurityPolicy: false // Allow preview iframe content
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Allow inline scripts for generated previews
+      styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles
+      imgSrc: ["'self'", "data:", "https:"],
+      frameSrc: ["'self'"],
+      frameAncestors: ["'self'"],
+      connectSrc: ["'self'"]
+    }
+  }
 }));
 
 // CORS configuration
